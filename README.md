@@ -2,6 +2,8 @@
 
 Sortea turnos y órdenes con una carrera de caballos con estilo de transmisión hípica.
 
+**▶ Jugar:** https://rinorambuena.github.io/the-horse-racing/
+
 - **Sorteo justo:** el orden de llegada se sortea antes de largar (Fisher–Yates con una semilla del generador criptográfico del navegador). **Cada orden posible tiene la misma probabilidad.** La carrera solo lo escenifica: remontadas, imprevistos y llegadas apretadas no cambian quién gana.
 - **Transmisión:** cámara que sigue al grupo de punta, zoom y cámara lenta en los últimos metros, y fotografía en blanco y negro cuando la llegada es estrecha.
 - **Relato en vivo** en pantalla y, si quieres, por voz (Web Speech API).
@@ -12,12 +14,17 @@ Sortea turnos y órdenes con una carrera de caballos con estilo de transmisión 
 
 Sin frameworks, sin dependencias y sin compilar: HTML, CSS y JavaScript (módulos ES) dibujado en `<canvas>`. El sonido está sintetizado con Web Audio.
 
-## Publicar en GitHub Pages
+## Publicación
 
-1. Crea un repositorio y sube todos los archivos tal cual (`index.html`, `styles.css` y la carpeta `js/`).
-2. En el repositorio, entra a **Settings → Pages**.
-3. En **Source**, elige *Deploy from a branch*, la rama `main` y la carpeta `/ (root)`. Guarda.
-4. Al minuto queda en `https://<tu-usuario>.github.io/<repo>/`.
+El sitio se publica con GitHub Pages desde la rama `master`, carpeta raíz (**Settings → Pages → Deploy from a branch**). Cada cambio en `master` se refleja en https://rinorambuena.github.io/the-horse-racing/ en uno o dos minutos.
+
+Una carrera compartida es un enlace con los participantes y la semilla; quien lo abre ve exactamente la misma carrera:
+
+```
+https://rinorambuena.github.io/the-horse-racing/?p=Ana|Benjamín|Constanza&s=<semilla>&d=30&e=20-35-25-0
+```
+
+El botón **Compartir carrera** del resultado lo genera solo.
 
 ## Probar en local
 
@@ -45,4 +52,4 @@ js/
 
 ## Licencia
 
-MIT
+MIT — ver [LICENSE](LICENSE).
