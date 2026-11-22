@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Horse Racing</title>
+  <meta name="description" content="Sortea turnos y órdenes con una carrera de caballos. Cada orden posible tiene la misma probabilidad." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%230e2a1f'/><circle cx='50' cy='50' r='30' fill='%23c9a54b'/><circle cx='50' cy='50' r='16' fill='%230e2a1f'/></svg>" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="masthead">
+    <div class="crest" aria-hidden="true"><span></span></div>
+    <div>
+      <p class="kicker">Hipódromo · Reunión de hoy</p>
+      <h1>The Horse Racing</h1>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="stage" aria-label="Carrera">
+      <div class="screen" id="screen">
+        <canvas id="track" aria-label="Transmisión de la carrera"></canvas>
+
+        <div class="badge" id="badge">
+          <strong id="badge-dist">1000 m</strong>
+          <span id="badge-info">Pasto · Pista ligera</span>
+        </div>
+
+        <ol class="board" id="board" aria-live="off"></ol>
+
+        <div class="ticker" id="ticker" aria-live="polite">
+          <span class="ticker-label">EN VIVO</span>
+          <span class="ticker-text" id="ticker-text">Inscribe a los participantes y presiona Largar.</span>
+        </div>
+
+        <div class="replay-label" id="replay-label" hidden>
+          <span>REPETICIÓN</span>
+          <small>Lucha por el último lugar</small>
+        </div>
+
+        <div class="photo-label" id="photo-label" hidden>
+          <span>FOTOGRAFÍA</span>
+          <small>Revisando la llegada…</small>
+        </div>
+
+        <div class="idle" id="idle">
+          <button class="btn-gold big" id="btn-start-overlay">Largar</button>
+          <p id="idle-note">Cada orden posible tiene la misma probabilidad.</p>
+        </div>
+
+        <div class="results" id="results" hidden>
+          <div class="results-card">
+            <p class="kicker">Resultado oficial</p>
+            <h2 id="results-title">The Horse Racing</h2>
+            <ol class="results-list" id="results-list"></ol>
+            <div class="results-actions">
+              <button class="btn-gold" id="btn-copy">Copiar orden</button>
+              <button class="btn-ghost" id="btn-share">Compartir carrera</button>
+              <button class="btn-ghost" id="btn-replay">Ver repetición</button>
+              <button class="btn-ghost" id="btn-new">Nueva carrera</button>
+            </div>
+            <p class="seed" id="seed-line"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="stage-bar">
+        <button class="btn-gold" id="btn-start">Largar</button>
+        <div class="toggles">
+          <label class="switch"><input type="checkbox" id="opt-sound" checked /> <span>Sonido</span></label>
+          <label class="switch"><input type="checkbox" id="opt-voice" /> <span>Relato por voz</span></label>
+        </div>
+      </div>
+    </section>
+
+    <aside class="panel" id="panel">
+      <section>
+        <h2>Inscripción</h2>
+        <label for="names" class="lbl">Participantes <small>(uno por línea, de 2 a 12)</small></label>
+        <textarea id="names" rows="8" spellcheck="false"></textarea>
+        <p class="hint" id="names-count"></p>
+      </section>
+
+      <section>
+        <h2>Carrera</h2>
+        <label class="lbl" for="duration">Duración</label>
+        <select id="duration">
+          <option value="20">Corta (~20 s)</option>
+          <option value="30" selected>Normal (~30 s)</option>
+          <option value="45">Larga (~45 s)</option>
+        </select>
+        <div class="event opt">
+          <label><input type="checkbox" id="opt-last" /> Zoom al último lugar</label>
+          <small>Tras anunciar al ganador, repetición en cámara lenta de la lucha por el último puesto.</small>
+        </div>
+      </section>
+
+      <section>
+        <h2>Imprevistos</h2>
+        <div class="event">
+          <label><input type="checkbox" id="ev-rain" checked /> Lluvia</label>
+          <select id="ev-rain-p"><option value="0.1">10 %</option><option value="0.2" selected>20 %</option><option value="0.35">35 %</option><option value="0.5">50 %</option></select>
+          <small>Pista pesada, barro y cielo cubierto.</small>
+        </div>
+        <div class="event">
+          <label><input type="checkbox" id="ev-inc" checked /> Incidentes</label>
+          <select id="ev-inc-p"><option value="0.2">20 %</option><option value="0.35" selected>35 %</option><option value="0.5">50 %</option><option value="0.75">75 %</option></select>
+          <small>Un caballo trastabilla o sale lento.</small>
+        </div>
+        <div class="event">
+          <label><input type="checkbox" id="ev-bolt" checked /> Desbocado</label>
+          <select id="ev-bolt-p"><option value="0.15">15 %</option><option value="0.25" selected>25 %</option><option value="0.4">40 %</option></select>
+          <small>Uno sale disparado y se apaga al final.</small>
+        </div>
+        <div class="event">
+          <label><input type="checkbox" id="ev-col" /> Colapso</label>
+          <select id="ev-col-p"><option value="0.1">10 %</option><option value="0.2" selected>20 %</option><option value="0.33">33 %</option><option value="0.5">50 %</option></select>
+          <small>Un caballo se detiene en la recta y queda último.</small>
+        </div>
+      </section>
+
+      <p class="fair">
+        El orden se sortea al largar con el generador criptográfico del navegador:
+        <strong>cada orden posible tiene exactamente la misma probabilidad</strong>.
+        Los imprevistos y las remontadas solo lo escenifican; no cambian quién gana.
+      </p>
+    </aside>
+  </main>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
