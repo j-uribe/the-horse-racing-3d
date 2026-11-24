@@ -4,7 +4,7 @@ Fork de [The Horse Racing](https://github.com/rinorambuena/the-horse-racing) con
 
 Sortea turnos y órdenes con una carrera de caballos con estilo de transmisión hípica.
 
-**▶ Jugar:** https://rinorambuena.github.io/the-horse-racing/
+**▶ Jugar:** https://j-uribe.github.io/the-horse-racing-3d/
 
 - **Sorteo justo:** el orden de llegada se sortea antes de largar (Fisher–Yates con una semilla del generador criptográfico del navegador). **Cada orden posible tiene la misma probabilidad.** La carrera solo lo escenifica: remontadas, imprevistos y llegadas apretadas no cambian quién gana.
 - **Transmisión:** cámara que sigue al grupo de punta, zoom y cámara lenta en los últimos metros, y fotografía en blanco y negro cuando la llegada es estrecha.
@@ -18,12 +18,12 @@ Sin frameworks y sin compilar: HTML, CSS y JavaScript (módulos ES). La escena 3
 
 ## Publicación
 
-El sitio se publica con GitHub Pages desde la rama `master`, carpeta raíz (**Settings → Pages → Deploy from a branch**). Cada cambio en `master` se refleja en https://rinorambuena.github.io/the-horse-racing/ en uno o dos minutos.
+El sitio se publica con GitHub Pages desde la rama `master`, carpeta raíz (**Settings → Pages → Deploy from a branch**). Cada cambio en `master` se refleja en https://j-uribe.github.io/the-horse-racing-3d/ en uno o dos minutos.
 
 Una carrera compartida es un enlace con los participantes y la semilla; quien lo abre ve exactamente la misma carrera:
 
 ```
-https://rinorambuena.github.io/the-horse-racing/?p=Ana|Benjamín|Constanza&s=<semilla>&d=30&e=20-35-25-0
+https://j-uribe.github.io/the-horse-racing-3d/?p=Ana|Benjamín|Constanza&s=<semilla>&d=30&e=20-35-25-0
 ```
 
 El botón **Compartir carrera** del resultado lo genera solo.
