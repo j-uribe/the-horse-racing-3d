@@ -1,6 +1,15 @@
 # 🏇 The Horse Racing 3D
 
-Fork de [The Horse Racing](https://github.com/rinorambuena/the-horse-racing) con la carrera en 3D. El sorteo, el relato, el sonido y los resultados son los mismos; cambia la transmisión: caballos y jinetes en 3D armados por código (sin modelos externos), partidor que abre sus puertas, tribuna frente a la meta, cordillera nevada al fondo, lluvia en 3D y tres cámaras (Transmisión, Cerca y Aérea; teclas 1, 2 y 3). Los nombres de los participantes flotan sobre cada caballo y se pueden ocultar.
+Fork de [The Horse Racing](https://github.com/rinorambuena/the-horse-racing) con la carrera en 3D. El sorteo, el relato, el sonido y los resultados son los mismos; cambia la transmisión:
+
+- **Óvalo completo**: largada en la recta opuesta, curva y recta final frente a la tribuna, con laguna en el césped interior y cordillera alrededor.
+- **Caballos y jinetes 3D** armados por código (sin modelos externos). Se cierran hacia la baranda y abren por fuera para adelantar; es solo escenificación, el orden de llegada sigue siendo el sorteado.
+- **Tres cámaras** (Transmisión, Cerca y Aérea; teclas 1, 2 y 3) y nombres flotando sobre cada caballo.
+- **Repetición de la llegada** vista de frente y en cámara lenta (opcional).
+- **Podio** con los tres primeros, el ganador celebrando y papel picado.
+- **Público animado** que se levanta y salta en la recta final.
+- **Hora del día**: tarde, atardecer, noche con focos o al azar (el azar sale de la semilla, así que un enlace compartido se ve igual).
+- **Video de la llegada**: se graba solo desde unos segundos antes del disco hasta el podio y se descarga desde el resultado (MP4 o WebM según el navegador).
 
 Sortea turnos y órdenes con una carrera de caballos con estilo de transmisión hípica.
 
@@ -46,7 +55,10 @@ js/
   app.js         interfaz, bucle principal, resultados y enlaces
   race.js        sorteo del orden y coreografía de la carrera (determinista por semilla)
   rng.js         generador con semilla y barajado uniforme
-  render.js      escena 3D: pista, partidor, tribuna, cámaras, lluvia, fotografía, nombres y minimapa
+  render.js      escena 3D: óvalo, partidor, tribuna con público, cámaras, hora del día, lluvia, podio, nombres y minimapa
+  track.js       geometría del óvalo (metros recorridos y distancia a la baranda → mundo)
+  lanes.js       trayectoria lateral de cada caballo: cerrarse, abrirse para adelantar, no montarse
+  recorder.js    grabación de la llegada en video
   horse3d.js     caballo y jinete 3D hechos con primitivas, con la animación del galope
   commentary.js  relator
   audio.js       sonido (Web Audio) y voz

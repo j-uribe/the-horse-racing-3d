@@ -27,6 +27,13 @@ export class Sound {
     src.start();
   }
 
+  // pista de audio para grabar la llegada en video
+  stream() {
+    if (!this.ctx || !this.ctx.createMediaStreamDestination) return null;
+    if (!this.dest) { this.dest = this.ctx.createMediaStreamDestination(); this.master.connect(this.dest); }
+    return this.dest.stream;
+  }
+
   setMuted(m) {
     this.muted = m;
     if (this.master) this.master.gain.setTargetAtTime(m ? 0 : 0.9, this.ctx.currentTime, 0.05);

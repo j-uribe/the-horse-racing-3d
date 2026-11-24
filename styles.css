@@ -243,3 +243,9 @@ select option { color: #111; }
 .replay-label small { font-size: 11px; color: #f3d9dc; }
 .event.opt { margin-top: 12px; }
 .event.opt small { padding-left: 24px; }
+
+/* resultados al costado mientras el podio sigue a la vista */
+.results.side { place-items: center end; padding-right: 22px; background: linear-gradient(90deg, rgba(8,20,14,0) 40%, rgba(8,20,14,0.55) 100%); backdrop-filter: none; }
+.results.side .results-card { width: min(440px, 46%); }
+.btn-ghost:disabled { opacity: 0.45; cursor: not-allowed; }
+#hour { margin-bottom: 12px; }

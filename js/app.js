@@ -1,6 +1,7 @@
 import { createRace, DISTANCE, LENGTH_M, posAt, speedAt, marginText } from "./race.js";
 import { newSeed } from "./rng.js";
-import { Scene } from "./render.js";
+import { Scene, HOURS, resolveHour } from "./render.js";
+import { Recorder } from "./recorder.js";
 import { Commentator } from "./commentary.js";
 import { Sound, Voice } from "./audio.js";
 
@@ -25,6 +26,8 @@ try {
 }
 const sound = new Sound();
 const voice = new Voice();
+const recorder = new Recorder();
+let recStarted = false, resultsShown = false;
 
 let race = null;
 let comm = null;
@@ -122,7 +125,7 @@ function updateBoard(t) {
   else if (lead.x >= DISTANCE) dist = "Llegada";
   else dist = `Faltan ${Math.max(10, Math.ceil((DISTANCE - lead.x) / 10) * 10)} m`;
   $("badge-dist").textContent = dist;
-  $("badge-info").textContent = `${DISTANCE} m · Pasto · ${race.rain ? "Pista pesada" : "Pista ligera"} · ${race.n} competidores`;
+  $("badge-info").textContent = `${DISTANCE} m · Pasto · ${race.rain ? "Pista pesada" : "Pista ligera"} · ${HOURS[resolveHour(race)].label} · ${race.n} competidores`;
 }
 
 // ---------------------------------------------------------------- carrera
@@ -130,6 +133,8 @@ function buildPreview() {
   const names = parseNames();
   if (names.length < 2) return;
   race = createRace({ names, seed: 1, duration: 30, events: {} });
+  const hour = $("hour").value;
+  race.cfg = { hour: hour === "random" ? "day" : hour };
   scene.reset(race);
   updateBoard(0);
 }
@@ -140,13 +145,17 @@ function startRace(seed, cfg) {
   const duration = cfg?.duration ?? parseInt($("duration").value, 10);
   const events = cfg?.events ?? getEvents();
   const lastZoom = cfg?.lastZoom ?? $("opt-last").checked;
+  const hour = cfg?.hour ?? $("hour").value;
+  const finishReplay = cfg?.finishReplay ?? $("opt-finish").checked;
 
   sound.init();
   sound.setMuted(!$("opt-sound").checked);
   voice.stop();
 
   race = createRace({ names, seed, duration, events });
-  race.cfg = { names, duration, events, lastZoom };
+  race.cfg = { names, duration, events, lastZoom, hour, finishReplay };
+  recorder.cancel(); recStarted = false; resultsShown = false;
+  $("btn-video").disabled = true;
   scene.reset(race);
   comm = new Commentator(race);
 
@@ -155,6 +164,8 @@ function startRace(seed, cfg) {
   $("board").style.visibility = "";
   $("replay-label").hidden = true;
   preLines = comm.pre(); preIdx = 0;
+  const hourLine = { dusk: "Cae la tarde sobre el hipódromo.", night: "Carrera nocturna bajo los focos." }[resolveHour(race)];
+  if (hourLine) preLines.splice(1, 0, hourLine);
   lastTick = { t: -10, pri: 0 };
 
   $("idle").hidden = true;
@@ -180,10 +191,35 @@ function announceWinner() {
   ticker(text, 4);
 }
 
+const finishReplayOn = () => race.cfg.finishReplay;
+
 function afterWinner() {
-  if (!lastReplay()) return;
-  $("board").style.visibility = "hidden"; // no revelar al último antes de la repetición
+  if (!lastReplay() && !finishReplayOn()) return;
+  if (lastReplay()) $("board").style.visibility = "hidden"; // no revelar al último antes de la repetición
   mode = "follow"; modeT = 0;
+}
+
+function afterFollow() {
+  if (finishReplayOn()) startFinishReplay();
+  else startReplay();
+}
+
+function setReplayLabel(text) {
+  $("replay-label").querySelector("small").textContent = text;
+  $("replay-label").hidden = false;
+}
+
+// repetición de la llegada desde el frente, en cámara lenta
+function startFinishReplay() {
+  const w = race.horses[race.order[0]];
+  mode = "headon"; modeT = 0;
+  raceT = Math.max(0, w.finishT - 2.6 * (race.duration / 30));
+  timeScale = 0.5;
+  scene.particles = [];
+  scene.snap = true;
+  setReplayLabel("La llegada");
+  $("badge-dist").textContent = "Repetición";
+  ticker("Repetición: así fue la llegada.", 3);
 }
 
 function startReplay() {
@@ -193,7 +229,7 @@ function startReplay() {
   timeScale = 0.6;
   scene.particles = [];
   scene.snap = true;
-  $("replay-label").hidden = false;
+  setReplayLabel("Lucha por el último lugar");
   $("badge-dist").textContent = "Repetición";
   ticker("Repetición: así se definió el último lugar.", 3);
 }
@@ -206,17 +242,50 @@ function announceLast() {
 }
 
 function finish() {
-  mode = "done";
+  mode = "podium"; modeT = 0;
   $("replay-label").hidden = true;
   $("photo-label").hidden = true;
   $("board").style.visibility = "";
   const lastH = race.horses[race.order[race.n - 1]];
   if (race.cfg.lastZoom && lastH.collapse) ticker(`Último lugar para ${lastH.name}, que no terminó la carrera.`, 2);
+  else {
+    const top = race.order.slice(0, 3).map((i, k) => `${k + 1}° ${race.horses[i].name}`).join(" · ");
+    ticker(`Podio: ${top}`, 2);
+  }
+  scene.startPodium();
+  $("badge-dist").textContent = "Podio";
   sound.fanfare();
   $("panel").classList.remove("locked");
   $("btn-start").textContent = "Nueva carrera";
   updateNamesHint();
+}
+
+function showPodiumResults() {
+  resultsShown = true;
+  const side = $("screen").clientWidth > 760;
+  $("results").classList.toggle("side", side);
+  scene.podiumShift = side ? 0.27 : 0;
   showResults();
+}
+
+function downloadVideo() {
+  if (!recorder.blob) return;
+  const url = URL.createObjectURL(recorder.blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `the-horse-racing-${race.seed.toString(36)}.${recorder.ext}`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+  toast("Video descargado.");
+}
+
+function hud() {
+  const replay = !$("replay-label").hidden, photo = !$("photo-label").hidden;
+  return {
+    ticker: $("ticker-text").textContent,
+    dist: $("badge-dist").textContent,
+    label: replay ? "REPETICIÓN" : photo ? "FOTO" : mode === "podium" ? "PODIO" : "EN VIVO",
+  };
 }
 
 function showResults() {
@@ -241,6 +310,8 @@ function shareURL() {
   p.set("p", race.cfg.names.join("|"));
   p.set("s", race.seed.toString(36));
   p.set("d", String(race.cfg.duration));
+  p.set("h", race.cfg.hour);
+  if (!race.cfg.finishReplay) p.set("r", "0");
   const e = race.cfg.events;
   p.set("e", [e.rain, e.incidents, e.bolter, e.collapse].map((x) => Math.round(x * 100)).join("-"));
   if (race.cfg.lastZoom) p.set("u", "1");
@@ -324,7 +395,7 @@ function frame(now) {
     timeScale = ease(timeScale, 0.7, 4, dtReal);
     dtRace = dtReal * timeScale;
     raceT += dtRace;
-    if (modeT > 2.2) startReplay();
+    if (modeT > 2.2) afterFollow();
   } else if (mode === "replay") {
     modeT += dtReal;
     const [a, b] = lastPair();
@@ -345,6 +416,22 @@ function frame(now) {
     dtRace = next - raceT;
     raceT = next;
     if (mode === "replay" && raceT >= b.finishT + 1.4) finish();
+  } else if (mode === "headon") {
+    modeT += dtReal;
+    const w = race.horses[race.order[0]];
+    const rem = DISTANCE - posAt(w, raceT);
+    timeScale = ease(timeScale, rem < 14 && rem > -3 ? 0.3 : 0.55, 5, dtReal);
+    const next = raceT + dtReal * timeScale;
+    dtRace = next - raceT;
+    raceT = next;
+    if (raceT >= w.finishT + 0.9) {
+      $("replay-label").hidden = true;
+      if (lastReplay()) startReplay(); else finish();
+    }
+  } else if (mode === "podium") {
+    modeT += dtReal;
+    if (modeT > 3.2 && recorder.recording) recorder.stop().then(() => { $("btn-video").disabled = false; });
+    if (modeT > 3.6 && !resultsShown) showPodiumResults();
   } else if (mode === "photoLast") {
     modeT += dtReal;
     if (modeT > 2.6) {
@@ -356,15 +443,34 @@ function frame(now) {
 
   if (race) {
     const frozen = mode === "photo" || mode === "photoLast";
-    if (!frozen) scene.updateParticles(raceT, dtRace, race.rain);
+    const podium = mode === "podium";
+    if (!frozen && !podium) scene.updateParticles(raceT, dtRace, race.rain);
     const camMode = mode === "pre" || mode === "idle" ? "pre" : "race";
     let cm = camMode, focus = null;
     if (frozen) cm = "photo";
     else if (mode === "follow") { cm = "focus"; focus = [race.horses[race.order[0]]]; }
     else if (mode === "replay") { cm = "focus"; focus = lastPair(); }
+    else if (mode === "headon") { cm = "headon"; focus = [race.horses[race.order[0]], race.horses[race.order[1]]]; }
+    else if (podium) cm = "podium";
     scene.updateCamera(raceT, dtReal, dtRace, cm, focus);
-    const replaying = mode === "follow" || mode === "replay" || mode === "photoLast";
-    scene.draw(raceT, { mode: camMode, photo: frozen, dtReal, hideMap: replaying });
+    const replaying = mode === "follow" || mode === "replay" || mode === "photoLast" || mode === "headon" || podium;
+    // emoción del público: crece en la recta final y estalla con la llegada
+    let excitement = 0.05;
+    if (mode === "running" || mode === "photo") {
+      const prog = Math.min(1, posAt(race.horses[race.order[0]], raceT) / DISTANCE);
+      excitement = winnerCalled ? 1 : 0.1 + 0.85 * smooth(0.55, 1, prog);
+    } else if (mode === "follow" || mode === "headon" || mode === "replay" || mode === "photoLast") excitement = 0.85;
+    else if (podium) excitement = Math.max(0.35, 1 - modeT * 0.08);
+    scene.excitement = excitement;
+
+    // grabación: desde unos segundos antes de la llegada hasta el podio
+    if (mode === "running" && !recStarted && recorder.supported) {
+      const w = race.horses[race.order[0]];
+      if (raceT >= w.finishT - 7 * (race.duration / 30)) { recStarted = true; recorder.start(sound.stream()); }
+    }
+
+    scene.draw(raceT, { mode: camMode, photo: frozen, dtReal, hideMap: replaying, noLabels: mode === "headon" });
+    if (recorder.recording) recorder.capture(scene.canvas, scene.overlay, hud());
 
     if (now - lastBoard > 140 && !frozen && !replaying) { lastBoard = now; updateBoard(raceT); }
 
@@ -377,7 +483,7 @@ function frame(now) {
         const prog = Math.min(1, posAt(race.horses[race.order[0]], raceT) / DISTANCE);
         level = winnerCalled ? 0.7 : 0.18 + 0.75 * smooth(0.45, 1, prog);
       }
-      if (mode === "done") level = 0.12;
+      if (podium) level = Math.max(0.15, 0.6 - modeT * 0.05);
       sound.crowd(level);
       if ((mode === "running" || mode === "replay") && dtRace > 0 && raceT < race.endT - 0.8) {
         hoofAcc += dtReal;
@@ -414,7 +520,11 @@ function loadShared() {
   $("duration").value = String(duration);
   const lastZoom = q.get("u") === "1";
   $("opt-last").checked = lastZoom;
-  shared = { seed, cfg: { names, duration, events: { rain, incidents, bolter, collapse }, lastZoom } };
+  const hour = ["day", "dusk", "night", "random"].includes(q.get("h")) ? q.get("h") : "day";
+  $("hour").value = hour;
+  const finishReplay = q.get("r") !== "0";
+  $("opt-finish").checked = finishReplay;
+  shared = { seed, cfg: { names, duration, events: { rain, incidents, bolter, collapse }, lastZoom, hour, finishReplay } };
   $("idle-note").textContent = "Carrera compartida: presiona Largar para verla exactamente como fue.";
   return true;
 }
@@ -443,6 +553,21 @@ function init() {
   $("btn-new").addEventListener("click", () => { $("results").hidden = true; startRace(newSeed()); });
   $("btn-replay").addEventListener("click", () => startRace(race.seed, race.cfg));
   $("btn-copy").addEventListener("click", () => copy(orderText(), "Orden copiado."));
+  $("btn-video").hidden = !recorder.supported;
+  $("btn-video").addEventListener("click", downloadVideo);
+  try {
+    if (!shared) {
+      const h = localStorage.getItem("thr-hour");
+      if (h && ["day", "dusk", "night", "random"].includes(h)) $("hour").value = h;
+      if (localStorage.getItem("thr-finish") === "0") $("opt-finish").checked = false;
+    }
+  } catch {}
+  if (mode === "idle") buildPreview();
+  $("hour").addEventListener("change", (e) => {
+    try { localStorage.setItem("thr-hour", e.target.value); } catch {}
+    if (mode === "idle") buildPreview();
+  });
+  $("opt-finish").addEventListener("change", (e) => { try { localStorage.setItem("thr-finish", e.target.checked ? "1" : "0"); } catch {} });
   $("btn-share").addEventListener("click", async () => {
     const url = shareURL();
     if (navigator.share) {

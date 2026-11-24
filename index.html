@@ -57,6 +57,7 @@
             <div class="results-actions">
               <button class="btn-gold" id="btn-copy">Copiar orden</button>
               <button class="btn-ghost" id="btn-share">Compartir carrera</button>
+              <button class="btn-ghost" id="btn-video" disabled>Descargar video</button>
               <button class="btn-ghost" id="btn-replay">Ver repetición</button>
               <button class="btn-ghost" id="btn-new">Nueva carrera</button>
             </div>
@@ -96,6 +97,17 @@
           <option value="30" selected>Normal (~30 s)</option>
           <option value="45">Larga (~45 s)</option>
         </select>
+        <label class="lbl" for="hour">Hora del día</label>
+        <select id="hour">
+          <option value="day" selected>Tarde</option>
+          <option value="dusk">Atardecer</option>
+          <option value="night">Noche, con focos</option>
+          <option value="random">Al azar</option>
+        </select>
+        <div class="event opt">
+          <label><input type="checkbox" id="opt-finish" checked /> Repetición de la llegada</label>
+          <small>Tras el ganador, la llegada otra vez en cámara lenta, vista de frente.</small>
+        </div>
         <div class="event opt">
           <label><input type="checkbox" id="opt-last" /> Zoom al último lugar</label>
           <small>Tras anunciar al ganador, repetición en cámara lenta de la lucha por el último puesto.</small>

@@ -263,13 +263,20 @@ export function poseHorse(H, s) {
   // en la recta final, el brazo de la fusta sube y baja al ritmo del galope
   const whipUp = drive * (0.9 + 0.7 * Math.sin(TAU * p * 0.5));
   H.arms[0].sh.rotation.z = pump * 2.2 + whipUp; H.arms[0].el.rotation.z = -pump * 1.5 + whipUp * 0.4;
+  // en el podio el ganador se endereza y levanta el brazo
+  const cel = s.celebrate || 0;
+  if (cel) {
+    H.upper.rotation.z += cel * 0.55;
+    H.arms[0].sh.rotation.z = cel * (2.3 + 0.25 * Math.sin(performance.now() / 180));
+    H.arms[0].el.rotation.z = cel * 0.5;
+  }
 
   // riendas desde las manos al bocado
   const pos = H.reins.geometry.attributes.position;
   H.inner.updateMatrixWorld(true);
   H.bit.getWorldPosition(tmpB); H.inner.worldToLocal(tmpB);
   for (let i = 0; i < 2; i++) {
-    if (i === 0 && drive > 0.3) { pos.setXYZ(0, tmpB.x, tmpB.y, tmpB.z); pos.setXYZ(1, tmpB.x, tmpB.y, tmpB.z); continue; }
+    if (i === 0 && (drive > 0.3 || cel)) { pos.setXYZ(0, tmpB.x, tmpB.y, tmpB.z); pos.setXYZ(1, tmpB.x, tmpB.y, tmpB.z); continue; }
     H.arms[i].hand.getWorldPosition(tmpA); H.inner.worldToLocal(tmpA);
     pos.setXYZ(i * 2, tmpA.x, tmpA.y, tmpA.z);
     pos.setXYZ(i * 2 + 1, tmpB.x, tmpB.y, tmpB.z + (i ? -0.08 : 0.08));
