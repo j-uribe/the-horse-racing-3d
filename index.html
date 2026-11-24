@@ -13,7 +13,7 @@
     <div class="crest" aria-hidden="true"><span></span></div>
     <div>
       <p class="kicker">Hipódromo · Reunión de hoy</p>
-      <h1>The Horse Racing</h1>
+      <h1>The Horse Racing <span class="three-d">3D</span></h1>
     </div>
   </header>
 
@@ -67,7 +67,13 @@
 
       <div class="stage-bar">
         <button class="btn-gold" id="btn-start">Largar</button>
+        <div class="seg" id="views" role="group" aria-label="Cámara">
+          <button type="button" data-view="tv" aria-pressed="true">Transmisión</button>
+          <button type="button" data-view="close" aria-pressed="false">Cerca</button>
+          <button type="button" data-view="back" aria-pressed="false">Aérea</button>
+        </div>
         <div class="toggles">
+          <label class="switch"><input type="checkbox" id="opt-labels" checked /> <span>Nombres</span></label>
           <label class="switch"><input type="checkbox" id="opt-sound" checked /> <span>Sonido</span></label>
           <label class="switch"><input type="checkbox" id="opt-voice" /> <span>Relato por voz</span></label>
         </div>

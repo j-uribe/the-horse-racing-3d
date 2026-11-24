@@ -13,7 +13,16 @@ const smooth = (a, b, x) => {
 const DEFAULT_NAMES = ["Ana", "Benjamín", "Constanza", "Diego", "Elena", "Felipe"];
 const STORE_KEY = "gp-orden-names";
 
-const scene = new Scene($("track"));
+let scene;
+try {
+  scene = new Scene($("track"));
+} catch (err) {
+  const msg = document.createElement("div");
+  msg.className = "webgl-error";
+  msg.textContent = "Este navegador no tiene WebGL activo, así que no puede mostrar la carrera en 3D. Prueba con Chrome, Edge o Firefox actualizados.";
+  $("screen").appendChild(msg);
+  throw err;
+}
 const sound = new Sound();
 const voice = new Voice();
 
@@ -443,6 +452,26 @@ function init() {
   });
   try { if (!shared) $("opt-last").checked = localStorage.getItem("thr-last") === "1"; } catch {}
   $("opt-last").addEventListener("change", (e) => { try { localStorage.setItem("thr-last", e.target.checked ? "1" : "0"); } catch {} });
+  const setView = (view) => {
+    scene.view = view;
+    $("views").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.view === view)));
+  };
+  try {
+    const v = localStorage.getItem("thr-view");
+    if (["tv", "close", "back"].includes(v)) setView(v);
+    if (localStorage.getItem("thr-labels") === "0") $("opt-labels").checked = false;
+  } catch {}
+  scene.labels = $("opt-labels").checked;
+  $("views").addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-view]");
+    if (!b) return;
+    setView(b.dataset.view);
+    try { localStorage.setItem("thr-view", b.dataset.view); } catch {}
+  });
+  $("opt-labels").addEventListener("change", (e) => {
+    scene.labels = e.target.checked;
+    try { localStorage.setItem("thr-labels", e.target.checked ? "1" : "0"); } catch {}
+  });
   $("opt-sound").addEventListener("change", (e) => sound.setMuted(!e.target.checked));
   $("opt-voice").addEventListener("change", (e) => {
     voice.enabled = e.target.checked;
@@ -450,7 +479,10 @@ function init() {
     if (!e.target.checked) voice.stop();
   });
   document.addEventListener("keydown", (e) => {
-    if (e.code === "Space" && e.target === document.body) { e.preventDefault(); onStart(); }
+    if (e.target !== document.body) return;
+    if (e.code === "Space") { e.preventDefault(); onStart(); }
+    const views = { Digit1: "tv", Digit2: "close", Digit3: "back" };
+    if (views[e.code]) $("views").querySelector(`[data-view="${views[e.code]}"]`).click();
   });
 
   new ResizeObserver(() => scene.resize()).observe($("screen"));

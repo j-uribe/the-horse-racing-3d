@@ -1,4 +1,6 @@
-# 🏇 The Horse Racing
+# 🏇 The Horse Racing 3D
+
+Fork de [The Horse Racing](https://github.com/rinorambuena/the-horse-racing) con la carrera en 3D. El sorteo, el relato, el sonido y los resultados son los mismos; cambia la transmisión: caballos y jinetes en 3D armados por código (sin modelos externos), partidor que abre sus puertas, tribuna frente a la meta, cordillera nevada al fondo, lluvia en 3D y tres cámaras (Transmisión, Cerca y Aérea; teclas 1, 2 y 3). Los nombres de los participantes flotan sobre cada caballo y se pueden ocultar.
 
 Sortea turnos y órdenes con una carrera de caballos con estilo de transmisión hípica.
 
@@ -12,7 +14,7 @@ Sortea turnos y órdenes con una carrera de caballos con estilo de transmisión 
 - **Resultado oficial** con márgenes (nariz, cabeza, cuerpos), botón para copiar el orden y un enlace que reproduce la misma carrera.
 - De 2 a 12 participantes, con mandiles numerados en los colores estándar.
 
-Sin frameworks, sin dependencias y sin compilar: HTML, CSS y JavaScript (módulos ES) dibujado en `<canvas>`. El sonido está sintetizado con Web Audio.
+Sin frameworks y sin compilar: HTML, CSS y JavaScript (módulos ES). La escena 3D usa [Three.js](https://threejs.org) 0.160, importado como módulo desde jsDelivr. El sonido está sintetizado con Web Audio.
 
 ## Publicación
 
@@ -44,8 +46,8 @@ js/
   app.js         interfaz, bucle principal, resultados y enlaces
   race.js        sorteo del orden y coreografía de la carrera (determinista por semilla)
   rng.js         generador con semilla y barajado uniforme
-  render.js      escena: paisaje, pista, cámara, zoom, fotografía
-  horse.js       dibujo procedural del caballo y el jinete
+  render.js      escena 3D: pista, partidor, tribuna, cámaras, lluvia, fotografía, nombres y minimapa
+  horse3d.js     caballo y jinete 3D hechos con primitivas, con la animación del galope
   commentary.js  relator
   audio.js       sonido (Web Audio) y voz
 ```
