@@ -1,6 +1,8 @@
-# 🏇 The Horse Racing 3D
+# 🏇 The Horse Racing
 
-Fork de [The Horse Racing](https://github.com/rinorambuena/the-horse-racing) con la carrera en 3D. El sorteo, el relato, el sonido y los resultados son los mismos; cambia la transmisión:
+Sortea turnos y órdenes con una carrera de caballos con estilo de transmisión hípica.
+
+La carrera se transmite en 3D:
 
 - **Óvalo completo**: largada en la recta opuesta, curva y recta final frente a la tribuna, con laguna en el césped interior y cordillera alrededor.
 - **Caballos y jinetes 3D** armados por código (sin modelos externos). Se cierran hacia la baranda y abren por fuera para adelantar; es solo escenificación, el orden de llegada sigue siendo el sorteado.
@@ -11,9 +13,7 @@ Fork de [The Horse Racing](https://github.com/rinorambuena/the-horse-racing) con
 - **Hora del día**: tarde, atardecer, noche con focos o al azar (el azar sale de la semilla, así que un enlace compartido se ve igual).
 - **Video de la llegada**: se graba solo desde unos segundos antes del disco hasta el podio y se descarga desde el resultado (MP4 o WebM según el navegador).
 
-Sortea turnos y órdenes con una carrera de caballos con estilo de transmisión hípica.
-
-**▶ Jugar:** https://j-uribe.github.io/the-horse-racing-3d/
+**▶ Jugar:** https://rinorambuena.github.io/the-horse-racing/
 
 - **Sorteo justo:** el orden de llegada se sortea antes de largar (Fisher–Yates con una semilla del generador criptográfico del navegador). **Cada orden posible tiene la misma probabilidad.** La carrera solo lo escenifica: remontadas, imprevistos y llegadas apretadas no cambian quién gana.
 - **Transmisión:** cámara que sigue al grupo de punta, zoom y cámara lenta en los últimos metros, y fotografía en blanco y negro cuando la llegada es estrecha.
@@ -27,12 +27,12 @@ Sin frameworks y sin compilar: HTML, CSS y JavaScript (módulos ES). La escena 3
 
 ## Publicación
 
-El sitio se publica con GitHub Pages desde la rama `master`, carpeta raíz (**Settings → Pages → Deploy from a branch**). Cada cambio en `master` se refleja en https://j-uribe.github.io/the-horse-racing-3d/ en uno o dos minutos.
+El sitio se publica con GitHub Pages desde la rama `master`, carpeta raíz (**Settings → Pages → Deploy from a branch**). Cada cambio en `master` se refleja en https://rinorambuena.github.io/the-horse-racing/ en uno o dos minutos.
 
 Una carrera compartida es un enlace con los participantes y la semilla; quien lo abre ve exactamente la misma carrera:
 
 ```
-https://j-uribe.github.io/the-horse-racing-3d/?p=Ana|Benjamín|Constanza&s=<semilla>&d=30&e=20-35-25-0
+https://rinorambuena.github.io/the-horse-racing/?p=Ana|Benjamín|Constanza&s=<semilla>&d=30&e=20-35-25-0
 ```
 
 El botón **Compartir carrera** del resultado lo genera solo.
